@@ -1,4 +1,4 @@
-module github.com/kakuilan/kgo
+module github.com/danbai225/kgo
 
 go 1.14
 
