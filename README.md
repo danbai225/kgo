@@ -15,11 +15,11 @@ golang 常用函数库/工具集,仅测试支持64位linux.
 ### 安装使用
 安装
 ```shell script
-go get -u github.com/kakuilan/kgo
+go get -u https://github.com/danbai225/kgo
 ```
 引入
 ```go
-import "github.com/kakuilan/kgo"
+import "https://github.com/danbai225/kgo"
 ```
 
 
