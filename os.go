@@ -6,6 +6,8 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/shirou/gopsutil/disk"
+	"github.com/shirou/gopsutil/mem"
 	"io"
 	"io/ioutil"
 	"net"
@@ -300,11 +302,17 @@ func (ko *LkkOS) MemoryUsage(virtual bool) (used, free, total uint64) {
 		}
 	} else {
 		// 真实物理机内存
-		sysi := &syscall.Sysinfo_t{}
-		err := syscall.Sysinfo(sysi)
+		//sysi := &syscall.Sysinfo_t{}
+		//err := syscall.Sysinfo(sysi)
+		//if err == nil {
+		//	total = sysi.Totalram * uint64(syscall.Getpagesize()/1024)
+		//	free = sysi.Freeram * uint64(syscall.Getpagesize()/1024)
+		//	used = total - free
+		//}
+		memory, err := mem.VirtualMemory()
 		if err == nil {
-			total = sysi.Totalram * uint64(syscall.Getpagesize()/1024)
-			free = sysi.Freeram * uint64(syscall.Getpagesize()/1024)
+			total = memory.Total
+			free = memory.Free
 			used = total - free
 		}
 	}
@@ -349,11 +357,10 @@ func (ko *LkkOS) CpuUsage() (user, idle, total uint64) {
 // free为空闲,
 // total为总数.
 func (ko *LkkOS) DiskUsage(path string) (used, free, total uint64) {
-	fs := &syscall.Statfs_t{}
-	err := syscall.Statfs(path, fs)
+	d, err := disk.Usage(path)
 	if err == nil {
-		total = fs.Blocks * uint64(fs.Bsize)
-		free = fs.Bfree * uint64(fs.Bsize)
+		total = d.Total
+		free = d.Free
 		used = total - free
 	}
 

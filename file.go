@@ -19,7 +19,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-	"syscall"
 )
 
 // GetExt 获取文件的小写扩展名,不包括点"." .
@@ -208,17 +207,30 @@ func (kf *LkkFile) IsExist(fpath string) bool {
 
 // IsWritable 路径是否可写.
 func (kf *LkkFile) IsWritable(fpath string) bool {
-	err := syscall.Access(fpath, syscall.O_RDWR)
+	//err := syscall.Access(fpath, syscall.O_RDWR)
+	//if err != nil {
+	//	return false
+	//}
+	//return true
+	ff := fmt.Sprintf("%s%c%s", fpath, os.PathSeparator, "test.test")
+	_, err := os.Create(ff)
 	if err != nil {
 		return false
 	}
+	os.Remove(ff)
 	return true
 }
 
 // IsReadable 路径是否可读.
 func (kf *LkkFile) IsReadable(fpath string) bool {
-	err := syscall.Access(fpath, syscall.O_RDONLY)
-	if err != nil {
+	//err := syscall.Access(fpath, syscall.O_RDONLY)
+	//if err != nil {
+	//	return false
+	//}
+	//return true
+	ff := fmt.Sprintf("%s%c%s", fpath, os.PathSeparator, "test.test")
+	_, err := ioutil.ReadFile(ff)
+	if strings.Index(err.Error(), "permission") > 0 {
 		return false
 	}
 	return true
