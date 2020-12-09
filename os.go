@@ -302,13 +302,6 @@ func (ko *LkkOS) MemoryUsage(virtual bool) (used, free, total uint64) {
 		}
 	} else {
 		// 真实物理机内存
-		//sysi := &syscall.Sysinfo_t{}
-		//err := syscall.Sysinfo(sysi)
-		//if err == nil {
-		//	total = sysi.Totalram * uint64(syscall.Getpagesize()/1024)
-		//	free = sysi.Freeram * uint64(syscall.Getpagesize()/1024)
-		//	used = total - free
-		//}
 		memory, err := mem.VirtualMemory()
 		if err == nil {
 			total = memory.Total

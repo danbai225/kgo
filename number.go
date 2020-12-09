@@ -54,12 +54,17 @@ func (kn *LkkNumber) NumberFormat(number float64, decimal uint8, point, thousand
 }
 
 // Range 根据范围创建数组,包含指定的元素.
-func (kn *LkkNumber) Range(min, max int) []int {
-	a := make([]int, max-min+1)
-	for i := range a {
-		a[i] = min + i
+// start为起始元素值,end为末尾元素值.若start<end,返回升序的数组;若start>end,返回降序的数组.
+func (kn *LkkNumber) Range(start, end int) []int {
+	res := make([]int, kn.AbsInt(int64(end-start))+1)
+	for i := range res {
+		if end > start {
+			res[i] = start + i
+		} else {
+			res[i] = start - i
+		}
 	}
-	return a
+	return res
 }
 
 // AbsFloat 浮点型取绝对值.
@@ -285,9 +290,14 @@ func (kn *LkkNumber) Expm1(x float64) float64 {
 	return math.Exp(x) - 1
 }
 
-// Pow 指数表达式.
+// Pow 指数表达式,求x的y次方.
 func (kn *LkkNumber) Pow(x, y float64) float64 {
 	return math.Pow(x, y)
+}
+
+// Log 对数表达式,求以y为底x的对数.
+func (kn *LkkNumber) Log(x, y float64) float64 {
+	return math.Log(x) / math.Log(y)
 }
 
 // ByteFormat 格式化文件比特大小.
@@ -323,14 +333,16 @@ func (kn *LkkNumber) IsEven(val int) bool {
 }
 
 // NumSign 返回数值的符号.值>0为1,<0为-1,其他为0.
-func (kn *LkkNumber) NumSign(value float64) float64 {
+func (kn *LkkNumber) NumSign(value float64) (res int8) {
 	if value > 0 {
-		return 1
+		res = 1
 	} else if value < 0 {
-		return -1
+		res = -1
 	} else {
-		return 0
+		res = 0
 	}
+
+	return
 }
 
 // IsNegative 数值是否为负数.
@@ -360,7 +372,7 @@ func (kn *LkkNumber) IsWhole(value float64) bool {
 
 // IsNatural 数值是否为自然数.
 func (kn *LkkNumber) IsNatural(value float64) bool {
-	return kn.IsWhole(value) && kn.IsPositive(value)
+	return kn.IsWhole(value) && kn.IsNonNegative(value)
 }
 
 // InRangeInt 数值是否在2个整数范围内.
@@ -525,6 +537,31 @@ func (kn *LkkNumber) GeoDistance(lng1, lat1, lng2, lat2 float64) float64 {
 }
 
 // IsNan 是否为“非数值”.
-func (kn *LkkNumber) IsNan(val float64) bool {
-	return math.IsNaN(val)
+func (kn *LkkNumber) IsNan(val interface{}) bool {
+	if isFloat(val) {
+		return math.IsNaN(KConv.ToFloat(val))
+	}
+
+	return !isNumeric(val)
+}
+
+// IsNaturalRange 是否连续的自然数数组/切片,如[0,1,2,3...],其中不能有间断.
+// strict为是否严格检查元素的顺序.
+func (kn *LkkNumber) IsNaturalRange(arr []int, strict bool) (res bool) {
+	n := len(arr)
+	if n == 0 {
+		return
+	}
+
+	orig := kn.Range(0, n-1)
+	ctyp := COMPARE_ONLY_VALUE
+
+	if strict {
+		ctyp = COMPARE_BOTH_KEYVALUE
+	}
+
+	diff := KArr.ArrayDiff(orig, arr, ctyp)
+
+	res = len(diff) == 0
+	return
 }

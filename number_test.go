@@ -29,14 +29,26 @@ func BenchmarkNumberFormat(b *testing.B) {
 }
 
 func TestRange(t *testing.T) {
-	min := 1
-	max := 5
-	res := KNum.Range(min, max)
-	if len(res) != max-min+1 {
+	var start, end int = 1, 5
+	res0 := KNum.Range(start, end)
+	if len(res0) != 5 || res0[0] != start {
 		t.Error("Range fail")
 		return
 	}
 
+	start, end = 5, 1
+	res1 := KNum.Range(start, end)
+	if len(res1) != 5 || res1[0] != start {
+		t.Error("Range fail")
+		return
+	}
+
+	start, end = 3, 3
+	res2 := KNum.Range(start, end)
+	if len(res2) != 1 {
+		t.Error("Range fail")
+		return
+	}
 }
 
 func BenchmarkRange(b *testing.B) {
@@ -532,6 +544,22 @@ func BenchmarkPow(b *testing.B) {
 	}
 }
 
+func TestLog(t *testing.T) {
+	res1 := KNum.Log(100, 10)
+	res2 := KNum.Log(16, 2)
+	if int(res1) != 2 || int(res2) != 4 {
+		t.Error("Log fail")
+		return
+	}
+}
+
+func BenchmarkLog(b *testing.B) {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		KNum.Log(100, 10)
+	}
+}
+
 func TestByteFormat(t *testing.T) {
 	res1 := KNum.ByteFormat(0, 0, "")
 	res2 := KNum.ByteFormat(1024000, 2, " ")
@@ -584,7 +612,7 @@ func BenchmarkIsEven(b *testing.B) {
 func TestSign(t *testing.T) {
 	var tests = []struct {
 		param    float64
-		expected float64
+		expected int8
 	}{
 		{0, 0},
 		{-1, -1},
@@ -748,7 +776,7 @@ func TestIsNatural(t *testing.T) {
 		param    float64
 		expected bool
 	}{
-		{0, false},
+		{0, true},
 		{-1, false},
 		{10, true},
 		{3.14, false},
@@ -1131,8 +1159,10 @@ func BenchmarkGeoDistance(b *testing.B) {
 func TestIsNan(t *testing.T) {
 	res1 := KNum.IsNan(math.Acos(1.01))
 	res2 := KNum.IsNan(123.456)
+	res3 := KNum.IsNan("4.367")
+	res4 := KNum.IsNan("hello")
 
-	if !res1 || res2 {
+	if !res1 || res2 || res3 || !res4 {
 		t.Error("IsNan fail")
 		return
 	}
@@ -1171,6 +1201,47 @@ func TestPercent(t *testing.T) {
 func BenchmarkPercent(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		KNum.IsNan(123.456)
+		KNum.Percent(23.456, 68)
+	}
+}
+
+func TestIsNaturalRange(t *testing.T) {
+	arr1 := []int{1, 2, 3}
+	arr2 := []int{0, 3, 1, 2}
+	arr3 := []int{0, 1, 2, 3}
+	arr4 := []int{0, 1, 3, 4}
+
+	res1 := KNum.IsNaturalRange(arr1, false)
+	if res1 {
+		t.Error("IsNaturalRange fail")
+		return
+	}
+
+	res2 := KNum.IsNaturalRange(arr2, false)
+	res3 := KNum.IsNaturalRange(arr2, true)
+	if !res2 || res3 {
+		t.Error("IsNaturalRange fail")
+		return
+	}
+
+	res4 := KNum.IsNaturalRange(arr3, false)
+	res5 := KNum.IsNaturalRange(arr3, true)
+	if !res4 || !res5 {
+		t.Error("IsNaturalRange fail")
+		return
+	}
+
+	res6 := KNum.IsNaturalRange(arr4, false)
+	if res6 {
+		t.Error("IsNaturalRange fail")
+		return
+	}
+}
+
+func BenchmarkIsNaturalRange(b *testing.B) {
+	b.ResetTimer()
+	arr := []int{0, 1, 2, 3}
+	for i := 0; i < b.N; i++ {
+		KNum.IsNaturalRange(arr, false)
 	}
 }
